@@ -13,9 +13,9 @@ from models import tb_user,\
     tb_usertype,\
     tb_clientes,\
     tb_terreno,\
-    tb_terreno_arquivos,\
+    tb_terreno_arquivo,\
     tb_lote,\
-    tb_lote_arquivos,\
+    tb_lote_arquivo,\
     tb_venda
 from helpers import \
     frm_pesquisa, \
@@ -624,7 +624,7 @@ def atualizarCliente():
 #PODE ACESSAR: administrador
 #---------------------------------------------------------------------------------------------------------------------------------
 @app.route('/terreno', methods=['POST','GET'])
-def cliente():
+def terreno():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
         return redirect(url_for('login',proxima=url_for('cliente')))         
@@ -672,10 +672,10 @@ def criarTerreno():
         return redirect(url_for('novoTerreno'))
     nome_terreno  = form.nome_terreno.data
     end_terreno = form.end_terreno.data
-    num_terreno = form.numenum_terrenod_cliente.data
+    num_terreno = form.num_terreno.data
     bairro_terreno = form.bairro_terreno.data
     cidade_terreno = form.cidade_terreno.data
-    uf_terrreno = form.uf_terrreno.data
+    uf_terreno = form.uf_terreno.data
     matricula_terreno = form.matricula_terreno.data
     status_terreno = form.status_terreno.data
 
@@ -684,12 +684,11 @@ def criarTerreno():
         flash ('Terreno já existe','danger')
         return redirect(url_for('terreno')) 
     novoTerreno = tb_terreno(nome_terreno=nome_terreno,\
-                            nomefantasia_cliente = nomefantasia_cliente,\
                             end_terreno = end_terreno,\
                             num_terreno = num_terreno,\
                             bairro_terreno = bairro_terreno,\
                             cidade_terreno = cidade_terreno,\
-                            uf_terrreno = uf_terrreno,\
+                            uf_terreno = uf_terreno,\
                             matricula_terreno = matricula_terreno,\
                             status_terreno=status_terreno)
     flash('Terreno criado com sucesso!','success')
@@ -708,16 +707,22 @@ def visualizarTerreno(id):
         flash('Sessão expirou, favor logar novamente','danger')
         return redirect(url_for('login',proxima=url_for('visualizarTerreno')))  
     terreno = tb_terreno.query.filter_by(cod_terreno=id).first()
+
+    terreno_arquivos = tb_terreno_arquivo.query.filter_by(cod_terreno=id).all()
+
+    lotes = tb_lote.query.order_by(tb_lote.cod_lote)\
+        .filter(tb_lote.cod_terreno == id)
+
     form = frm_visualizar_terreno()
     form.nome_terreno.data = terreno.nome_terreno
     form.end_terreno.data = terreno.end_terreno
     form.num_terreno.data = terreno.num_terreno
     form.bairro_terreno.data = terreno.bairro_terreno
     form.cidade_terreno.data = terreno.cidade_terreno
-    form.uf_terrreno.data = terreno.uf_terrreno
+    form.uf_terreno.data = terreno.uf_terreno
     form.matricula_terreno.data = terreno.matricula_terreno
-    form.status_terreno.data = terreno.status_status_terrenocliente
-    return render_template('visualizarTerreno.html', titulo='Visualizar Terreno', id=id, form=form)   
+    form.status_terreno.data = terreno.status_terreno
+    return render_template('visualizarTerreno.html', titulo='Visualizar Terreno', id=id, form=form, terreno_arquivos=terreno_arquivos, lotes=lotes)   
 
 #---------------------------------------------------------------------------------------------------------------------------------
 #ROTA: editarTerreno
@@ -736,7 +741,7 @@ def editarTerreno(id):
     form.num_terreno.data = terreno.num_terreno
     form.bairro_terreno.data = terreno.bairro_terreno
     form.cidade_terreno.data = terreno.cidade_terreno
-    form.uf_terrreno.data = terreno.uf_terrreno
+    form.uf_terreno.data = terreno.uf_terreno
     form.matricula_terreno.data = terreno.matricula_terreno
     form.status_terreno.data = terreno.status_status_terrenocliente
     return render_template('editarTerreno.html', titulo='Editar Terreno', id=id, form=form)   
@@ -747,7 +752,7 @@ def editarTerreno(id):
 #PODE ACESSAR: administrador
 #---------------------------------------------------------------------------------------------------------------------------------
 @app.route('/atualizarTerreno', methods=['POST',])
-def atualizarCliente():
+def atualizarTerreno():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
         return redirect(url_for('login',proxima=url_for('atualizarTerreno')))      
@@ -760,7 +765,7 @@ def atualizarCliente():
         terreno.num_terreno = form.num_terreno.data
         terreno.bairro_terreno = form.bairro_terreno.data
         terreno.cidade_terreno = form.cidade_terreno.data
-        terreno.uf_terrreno = form.uf_terrreno.data
+        terreno.uf_terreno = form.uf_terreno.data
         terreno.matricula_terreno = form.matricula_terreno.data
         terreno.complemento_cliente = form.complemento_cliente.data
         terreno.status_terreno = form.status_terreno.data
@@ -770,3 +775,211 @@ def atualizarCliente():
     else:
         flash('Favor verificar os campos!','danger')
     return redirect(url_for('visualizarTerreno', id=request.form['id']))
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: novoTerrenoArquivo
+#FUNÇÃO: inclusão de arquivos banco de dados
+#PODE ACESSAR: administrador
+#--------------------------------------------------------------------------------------------------------------------------------- 
+@app.route('/novoTerrenoArquivo/<int:id>')
+def novoTerrenoArquivo(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('novoSolicitacaoFoto'))) 
+    form = frm_editar_terreno_arquivo()
+    return render_template('novoTerrenoArquivo.html', titulo='Inserir imagens', form=form, id=id)
+
+@app.route('/terreno_arquivo/<int:id>', methods=['POST'])
+def terreno_arquivo(id):
+    arquivo = request.files['arquivo_terreno_arquivo']
+    nome_arquivo = secure_filename(arquivo.filename)
+    nome_base, extensao = os.path.splitext(nome_arquivo)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+    nome_unico = f"{nome_base}_{timestamp}{extensao}"
+    caminho_arquivo = os.path.join(app.config['UPLOAD_PATH'], nome_unico)
+    arquivo.save(caminho_arquivo)
+
+    flash('Arquivo carregado com sucesso!','success')
+    novoTerrenoArquivo = tb_terreno_arquivo(cod_terreno=id,arquivo_terreno_arquivo=nome_unico)
+    db.session.add(novoTerrenoArquivo)
+    db.session.commit()
+    return redirect(url_for('novoTerrenoArquivo',id=id))
+
+
+@app.route('/excluirArquivo/<int:id>')
+def excluirArquivo(id):
+    arquivo = tb_terreno_arquivo.query.filter_by(cod_terreno_arquivo=id).first()
+    idterreno = arquivo.cod_solicitacao
+    caminho_arquivo = os.path.join(app.config['UPLOAD_PATH'], arquivo.arquivo_terreno_arquivo)
+    try:
+        os.remove(caminho_arquivo)
+        msg = "Arquivo excluído com sucesso!"
+    except Exception as e:
+        msg = f"Ocorreu um erro ao excluir o arquivo: {e}"
+
+    apagarArqvuio = tb_terreno_arquivo.query.filter_by(cod_terreno_arquivo=id).one()
+    db.session.delete(apagarArqvuio)
+    db.session.commit()
+
+    flash('Arquivo apagado com sucesso!','success')
+    return redirect(url_for('visualizarTerreno',id=idterreno))
+
+
+##################################################################################################################################
+#LOTE
+##################################################################################################################################
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: novoLote
+#FUNÇÃO: formulario de inclusão
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/novoLote/<int:id>')
+def novoLote(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('novoLote',id=id))) 
+    form = frm_editar_lote()
+    return render_template('novoLote.html', titulo='Novo Lote', form=form,id=id)
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: criarLote
+#FUNÇÃO: inclusão no banco de dados
+#PODE ACESSAR: administrador
+#--------------------------------------------------------------------------------------------------------------------------------- 
+@app.route('/criarLote', methods=['POST',])
+def criarLote():
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('criarTerreno')))     
+    form = frm_editar_terreno(request.form)
+    if not form.validate_on_submit():
+        flash('Por favor, preencha todos os dados','danger')
+        return redirect(url_for('novoTerreno'))
+    valortotal_lote  = form.valortotal_lote.data
+    matricula_lote = form.matricula_lote.data
+    status_aditivo = form.status_aditivo.data
+
+    lote = tb_lote.query.filter_by(matricula_lote=matricula_lote).first()
+    if lote:
+        flash ('Terreno já existe','danger')
+        return redirect(url_for('terreno')) 
+    novoLote = tb_terreno(valortotal_lote=valortotal_lote,\
+                            matricula_lote = matricula_lote,\
+                            status_aditivo=status_aditivo)
+    flash('Lote criado com sucesso!','success')
+    db.session.add(novoLote)
+    db.session.commit()
+    return redirect(url_for('visualizarTerreno',id=id))
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: visualizarLote
+#FUNÇÃO: formulario de visualização
+#PODE ACESSAR: administrador
+#--------------------------------------------------------------------------------------------------------------------------------- 
+@app.route('/visualizarLote/<int:id>')
+def visualizarLote(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('visualizarLote')))  
+    lote = tb_lote.query.filter_by(cod_lote=id).first()
+
+    #terreno_arquivos = tb_terreno_arquivo.query.filter_by(cod_terreno=id).all()
+
+    #lotes = tb_lote.query.order_by(tb_lote.cod_lote)\
+    #    .filter(tb_lote.cod_terreno == id)
+
+    form = frm_visualizar_lote()
+    form.valortotal_lote.data = lote.valortotal_lote
+    form.matricula_lote.data = lote.matricula_lote
+    form.status_lote.data = lote.status_lote
+    return render_template('visualizarLote.html', titulo='Visualizar Lote', id=id, form=form)   
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: editarLote
+##FUNÇÃO: formulário de edição
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/editarLote/<int:id>')
+def editarLote(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('editarLote')))  
+    lote = tb_lote.query.filter_by(cod_lote=id).first()
+    form = frm_editar_lote()
+    form.valortotal_lote.data = lote.valortotal_lote
+    form.matricula_lote.data = lote.matricula_lote
+    form.status_lote.data = lote.status_lote
+    return render_template('editarLote.html', titulo='Editar Lote', id=id, form=form)   
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: atualizarLote
+#FUNÇÃO: alterar informações no banco de dados
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/atualizarLote', methods=['POST',])
+def atualizarLote():
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('atualizarLote')))      
+    form = frm_editar_lote(request.form)
+    if form.validate_on_submit():
+        id = request.form['id']
+        lote = tb_lote.query.filter_by(cod_lote=id).first()
+        form.valortotal_lote.data = lote.valortotal_lote
+        form.matricula_lote.data = lote.matricula_lote
+        form.status_lote.data = lote.status_lote
+        db.session.add(lote)
+        db.session.commit()
+        flash('Lote atualizado com sucesso!','success')
+    else:
+        flash('Favor verificar os campos!','danger')
+    return redirect(url_for('visualizarLote', id=request.form['id']))
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: novoLoteArquivo
+#FUNÇÃO: inclusão de arquivos banco de dados
+#PODE ACESSAR: administrador
+#--------------------------------------------------------------------------------------------------------------------------------- 
+@app.route('/novoLoteArquivo/<int:id>')
+def novoLoteArquivo(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('novoSolicitacaoFoto'))) 
+    form = frm_editar_terreno_arquivo()
+    return render_template('novoLoteArquivo.html', titulo='Inserir arquivos', form=form, id=id)
+
+@app.route('/lote_arquivo/<int:id>', methods=['POST'])
+def lote_arquivo(id):
+    arquivo = request.files['arquivo_lote_arquivo']
+    nome_arquivo = secure_filename(arquivo.filename)
+    nome_base, extensao = os.path.splitext(nome_arquivo)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+    nome_unico = f"{nome_base}_{timestamp}{extensao}"
+    caminho_arquivo = os.path.join(app.config['UPLOAD_PATH'], nome_unico)
+    arquivo.save(caminho_arquivo)
+
+    flash('Arquivo carregado com sucesso!','success')
+    novoLoteArquivo = tb_lote_arquivo(cod_terreno=id,arquivo_terreno_arquivo=nome_unico)
+    db.session.add(novoLoteArquivo)
+    db.session.commit()
+    return redirect(url_for('novoLoteArquivo',id=id))
+
+
+@app.route('/excluirLoteArquivo/<int:id>')
+def excluirLoteArquivo(id):
+    arquivo = tb_lote_arquivo.query.filter_by(cod_lotearquivo=id).first()
+    idlote = arquivo.cod_lotearquivo
+    caminho_arquivo = os.path.join(app.config['UPLOAD_PATH'], arquivo.arquivo_lote_arquivo)
+    try:
+        os.remove(caminho_arquivo)
+        msg = "Arquivo excluído com sucesso!"
+    except Exception as e:
+        msg = f"Ocorreu um erro ao excluir o arquivo: {e}"
+
+    apagarArquivo = tb_lote_arquivo.query.filter_by(cod_lote_arquivo=id).one()
+    db.session.delete(apagarArquivo)
+    db.session.commit()
+
+    flash('Arquivo apagado com sucesso!','success')
+    return redirect(url_for('visualizarLote',id=idlote))

@@ -55,11 +55,10 @@ class tb_terreno(db.Model):
     cod_terreno = db.Column(db.Integer, primary_key=True, autoincrement=True)
     end_terreno = db.Column(db.String(50), nullable=False)
     nome_terreno = db.Column(db.String(50), nullable=False)
-    end_cliente = db.Column(db.String(50), nullable=False)
     num_terreno = db.Column(db.String(50), nullable=False)
     bairro_terreno = db.Column(db.String(50), nullable=False)
     cidade_terreno = db.Column(db.String(50), nullable=False)
-    uf_terrreno = db.Column(db.String(50), nullable=False)
+    uf_terreno = db.Column(db.String(50), nullable=False)
     matricula_terreno = db.Column(db.Integer, nullable=False)
     status_terreno = db.Column(db.Integer, nullable=False)
     def __repr__(self):
@@ -69,7 +68,7 @@ class tb_terreno(db.Model):
 #TABELA: TERRENO_ARQUIVOS
 #ORIGEM: BANCO DE DADOS
 #---------------------------------------------------------------------------------------------------------------------------------
-class tb_terreno_arquivos(db.Model):
+class tb_terreno_arquivo(db.Model):
     cod_terrenoarquivo = db.Column(db.Integer, primary_key=True, autoincrement=True)
     cod_terreno = db.Column(db.Integer, nullable=False)
     arquivo_terrenoarquivo = db.Column(db.String(50), nullable=False)
@@ -93,7 +92,7 @@ class tb_lote(db.Model):
 #TABELA: TERRENO_ARQUIVOS
 #ORIGEM: BANCO DE DADOS
 #---------------------------------------------------------------------------------------------------------------------------------
-class tb_lote_arquivos(db.Model):
+class tb_lote_arquivo(db.Model):
     cod_lotearquivo = db.Column(db.Integer, primary_key=True, autoincrement=True)
     cod_lote = db.Column(db.Integer, nullable=False)
     arquivo_lotearquivo = db.Column(db.String(50), nullable=False)

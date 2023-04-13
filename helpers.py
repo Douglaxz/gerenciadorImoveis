@@ -139,8 +139,8 @@ class frm_editar_terreno(FlaskForm):
     num_terreno = StringField('Nº:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o número do terreno"})
     bairro_terreno = StringField('Bairro:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o bairro do terreno"})
     cidade_terreno = StringField('Cidade:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o cidade do terreno"})
-    uf_terrreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o estado terreno"})
-    matricula_terreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o matrícula do terreno"})
+    uf_terreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o estado terreno"})
+    matricula_terreno = StringField('Matricula:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o matrícula do terreno"})
     status_terreno = SelectField('Situação:', coerce=int, choices=[(0, 'A venda'),(1, 'Vendido'),(2, 'Suspenso')])
     salvar = SubmitField('Salvar')    
 
@@ -155,8 +155,8 @@ class frm_visualizar_terreno(FlaskForm):
     num_terreno = StringField('Nº:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
     bairro_terreno = StringField('Bairro:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
     cidade_terreno = StringField('Cidade:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
-    uf_terrreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
-    matricula_terreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    uf_terreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    matricula_terreno = StringField('Matricula:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
     status_terreno = SelectField('Situação:', coerce=int, choices=[(0, 'A venda'),(1, 'Vendido'),(2, 'Suspenso')], render_kw={'readonly': True})
     salvar = SubmitField('Salvar')  
 
@@ -185,7 +185,7 @@ class frm_editar_terreno_arquivo(FlaskForm):
 class frm_editar_lote(FlaskForm):
     valortotal_lote = StringField('Valor:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o valor do lote"})
     matricula_lote = StringField('Matricula:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite a matricula do lote"})
-    status_aditivo = SelectField('Situação:', coerce=int, choices=[(0, 'A Venda'),(1, 'Vendido')])
+    status_lote = SelectField('Situação:', coerce=int, choices=[(0, 'A Venda'),(1, 'Vendido')])
     salvar = SubmitField('Salvar')    
 
 #---------------------------------------------------------------------------------------------------------------------------------
