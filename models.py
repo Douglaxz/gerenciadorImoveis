@@ -51,13 +51,12 @@ class tb_clientes(db.Model):
 #TABELA: TERRENO
 #ORIGEM: BANCO DE DADOS
 #---------------------------------------------------------------------------------------------------------------------------------
-class tb_contratos(db.Model):
+class tb_terreno(db.Model):
     cod_terreno = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    cod_cliente = db.Column(db.Integer, nullable=False)
     end_terreno = db.Column(db.String(50), nullable=False)
     nome_terreno = db.Column(db.String(50), nullable=False)
     end_cliente = db.Column(db.String(50), nullable=False)
-    num_terrno = db.Column(db.String(50), nullable=False)
+    num_terreno = db.Column(db.String(50), nullable=False)
     bairro_terreno = db.Column(db.String(50), nullable=False)
     cidade_terreno = db.Column(db.String(50), nullable=False)
     uf_terrreno = db.Column(db.String(50), nullable=False)
@@ -82,10 +81,10 @@ class tb_terreno_arquivos(db.Model):
 #ORIGEM: BANCO DE DADOS
 #---------------------------------------------------------------------------------------------------------------------------------
 class tb_lote(db.Model):
-    cod_terreno = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    cod_lote = db.Column(db.Integer, primary_key=True, autoincrement=True)
     cod_terreno = db.Column(db.Integer, nullable=False)
     status_lote = db.Column(db.String(50), nullable=False)
-    valortotal_lote = db.Column(db.Double, nullable=False)
+    valortotal_lote = db.Column(db.Float, nullable=False)
     matricula_lote = db.Column(db.String(50), nullable=False)
     def __repr__(self):
         return '<Name %r>' % self.name
@@ -111,7 +110,7 @@ class tb_venda(db.Model):
     cod_cliente = db.Column(db.Integer, nullable=False)
     status_venda = db.Column(db.String(50), nullable=False)
     qtdparcelas_venda = db.Column(db.Integer, nullable=False)
-    valorparcela_venda = db.Column(db.Double, nullable=False)
+    valorparcela_venda = db.Column(db.Float, nullable=False)
     diavenc_venda = db.Column(db.Integer, nullable=False)
     data_venda = db.Column(db.Date, nullable=False)
     def __repr__(self):
@@ -126,7 +125,7 @@ class tb_venda_parcela(db.Model):
     cod_venda = db.Column(db.Integer, nullable=False)
     cod_cliente = db.Column(db.Integer, nullable=False)
     status_vendaparcela = db.Column(db.String(50), nullable=False)
-    valorparcela_vendaparcela = db.Column(db.Double, nullable=False)
+    valorparcela_vendaparcela = db.Column(db.Float, nullable=False)
     datavenc_vendaparcela = db.Column(db.Integer, nullable=False)
     datapag_vendaparcela = db.Column(db.Integer, nullable=False)
     def __repr__(self):

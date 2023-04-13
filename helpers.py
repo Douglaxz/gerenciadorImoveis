@@ -1,7 +1,7 @@
 #importações
 import os
 from gerenciadorImoveis import app, db
-from models import tb_user, tb_usertype,tb_clientes
+from models import tb_user, tb_usertype,tb_clientes, tb_lote
 from flask_wtf import FlaskForm
 from wtforms import Form, StringField, validators, SubmitField,IntegerField, SelectField,PasswordField,DateField,EmailField,BooleanField,RadioField, TextAreaField, TimeField, TelField, DateTimeLocalField,FloatField, DecimalField,FileField
 
@@ -125,59 +125,67 @@ class frm_visualizar_cliente(FlaskForm):
 
 
 ##################################################################################################################################
-#CONTRATO
+#TERRENO
 ##################################################################################################################################
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#FORMUÁRIO: contrato
+#FORMUÁRIO: terreno
 #TIPO: edição
-#TABELA: tb_contrato
+#TABELA: tb_terreno
 #---------------------------------------------------------------------------------------------------------------------------------
-class frm_editar_contrato(FlaskForm):
-    cod_cliente = SelectField('Cliente:', coerce=int,  choices=[(g.cod_cliente, g.nomerazao_cliente) for g in tb_clientes.query.order_by('nomerazao_cliente')])
-    obj_contrato = StringField('Objeto:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o nome do evento"})
-    datavalidade_contrato = DateField('Validade:', render_kw={"placeholder": "digite o ano do evento"})
-    status_contrato = SelectField('Situação:', coerce=int, choices=[(0, 'Ativo'),(1, 'Inativo')])
+class frm_editar_terreno(FlaskForm):
+    nome_terreno = StringField('Nome:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o nome do terreno"})
+    end_terreno = StringField('Endereço:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o endereço do terreno"})
+    num_terreno = StringField('Nº:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o número do terreno"})
+    bairro_terreno = StringField('Bairro:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o bairro do terreno"})
+    cidade_terreno = StringField('Cidade:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o cidade do terreno"})
+    uf_terrreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o estado terreno"})
+    matricula_terreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o matrícula do terreno"})
+    status_terreno = SelectField('Situação:', coerce=int, choices=[(0, 'A venda'),(1, 'Vendido'),(2, 'Suspenso')])
     salvar = SubmitField('Salvar')    
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#FORMUÁRIO: contrato
+#FORMUÁRIO: terreno
 #TIPO: visualização
-#TABELA: tb_contrato
+#TABELA: tb_terreno
 #---------------------------------------------------------------------------------------------------------------------------------
-class frm_visualizar_contrato(FlaskForm):
-    cod_cliente = SelectField('Cliente:', coerce=int,  choices=[(g.cod_cliente, g.nomerazao_cliente) for g in tb_clientes.query.order_by('nomerazao_cliente')], render_kw={'readonly': True})
-    obj_contrato = StringField('Objeto:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
-    datavalidade_contrato = DateField('Validade:', render_kw={'readonly': True})
-    status_contrato = SelectField('Situação:', coerce=int, choices=[(0, 'Ativo'),(1, 'Inativo')], render_kw={'readonly': True})
+class frm_visualizar_terreno(FlaskForm):
+    end_terreno = StringField('Endereço:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    nome_terreno = StringField('Nome:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    num_terreno = StringField('Nº:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    bairro_terreno = StringField('Bairro:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    cidade_terreno = StringField('Cidade:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    uf_terrreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    matricula_terreno = StringField('Uf:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    status_terreno = SelectField('Situação:', coerce=int, choices=[(0, 'A venda'),(1, 'Vendido'),(2, 'Suspenso')], render_kw={'readonly': True})
+    salvar = SubmitField('Salvar')  
+
+##################################################################################################################################
+#TERRENO / ARQUIVO
+##################################################################################################################################
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#FORMUÁRIO: terreno / arquivo
+#TIPO: edição
+#TABELA: tb_terreno_arquivo
+#---------------------------------------------------------------------------------------------------------------------------------
+class frm_editar_terreno_arquivo(FlaskForm):
+    arquivo_terreno_arquivo = FileField('Arquivo:', [validators.DataRequired()], render_kw={"placeholder": "selecionar arquivo"})
     salvar = SubmitField('Salvar')
 
 ##################################################################################################################################
-#CONTRATO / ARQUIVO
+#LOTE
 ##################################################################################################################################
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#FORMUÁRIO: contrato / arquivo
+#FORMUÁRIO: lote
 #TIPO: edição
-#TABELA: tb_contrato_arquivo
+#TABELA: tb_lote
 #---------------------------------------------------------------------------------------------------------------------------------
-class frm_editar_contrato_arquivo(FlaskForm):
-    arquivo_contrato_arquivo = FileField('Arquivo:', [validators.DataRequired()], render_kw={"placeholder": "selecionar imagem"})
-    salvar = SubmitField('Salvar')
-
-##################################################################################################################################
-#ADITIVOS
-##################################################################################################################################
-
-#---------------------------------------------------------------------------------------------------------------------------------
-#FORMUÁRIO: aditivo
-#TIPO: edição
-#TABELA: tb_aditivos
-#---------------------------------------------------------------------------------------------------------------------------------
-class frm_editar_aditivo(FlaskForm):
-    desc_aditivo = StringField('Objeto:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o descritivo do aditivo"})
-    data_aditivo = DateField('Data:', render_kw={"placeholder": "digite a data do aditivo"})
-    status_aditivo = SelectField('Situação:', coerce=int, choices=[(0, 'Ativo'),(1, 'Inativo')])
+class frm_editar_lote(FlaskForm):
+    valortotal_lote = StringField('Valor:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite o valor do lote"})
+    matricula_lote = StringField('Matricula:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={"placeholder": "digite a matricula do lote"})
+    status_aditivo = SelectField('Situação:', coerce=int, choices=[(0, 'A Venda'),(1, 'Vendido')])
     salvar = SubmitField('Salvar')    
 
 #---------------------------------------------------------------------------------------------------------------------------------
@@ -185,8 +193,57 @@ class frm_editar_aditivo(FlaskForm):
 #TIPO: visualização
 #TABELA: tb_aditivos
 #---------------------------------------------------------------------------------------------------------------------------------
-class frm_visualizar_aditivo(FlaskForm):
-    desc_aditivo = StringField('Objeto:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
-    data_aditivo = DateField('Data:', render_kw={'readonly': True})
-    status_aditivo = SelectField('Situação:', coerce=int, choices=[(0, 'Ativo'),(1, 'Inativo')], render_kw={'readonly': True})
+class frm_visualizar_lote(FlaskForm):
+    valortotal_lote = StringField('Valor:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    matricula_lote = StringField('Matricula:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    status_lote = SelectField('Situação:', coerce=int, choices=[(0, 'Ativo'),(1, 'Inativo')], render_kw={'readonly': True})
+    salvar = SubmitField('Salvar')
+
+##################################################################################################################################
+#LOTE / ARQUIVO
+##################################################################################################################################
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#FORMUÁRIO: lote / arquivo
+#TIPO: edição
+#TABELA: tb_lote_arquivo
+#---------------------------------------------------------------------------------------------------------------------------------
+class frm_editar_lote_arquivo(FlaskForm):
+    arquivo_lote_arquivo = FileField('Arquivo:', [validators.DataRequired()], render_kw={"placeholder": "selecionar arquivo"})
+    salvar = SubmitField('Salvar')
+
+
+##################################################################################################################################
+#VENDA
+##################################################################################################################################
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#FORMUÁRIO: lote
+#TIPO: edição
+#TABELA: tb_venda
+#---------------------------------------------------------------------------------------------------------------------------------
+class frm_editar_venda(FlaskForm):
+    cod_lote = SelectField('Lote:', coerce=int, choices=[(g.cod_lote, g.matricula_lote) for g in tb_lote.query.all()])
+    cod_cliente = SelectField('Lote:', coerce=int, choices=[(g.cod_cliente, g.nome_cliente) for g in tb_lote.query.all()])
+    qtdparcelas_venda = IntegerField('Qtd Parcelas:', [validators.DataRequired()], render_kw={"placeholder": "digite o total de parcelas"})
+    valorparcela_venda = DecimalField('Valor Parcelas:', [validators.DataRequired()], render_kw={"placeholder": "digite o total de parcelas"})
+    diavenc_venda = IntegerField('Dia Vencimento:', [validators.DataRequired()], render_kw={"placeholder": "digite o total de parcelas"})
+    data_venda = DateField('Data Venda:', [validators.DataRequired()], render_kw={"placeholder": "digite a data da venda do lote"})
+    status_venda = SelectField('Situação:', coerce=int, choices=[(0, 'A Venda'),(1, 'Vendido')])
+    salvar = SubmitField('Salvar')    
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#FORMUÁRIO: aditivo
+#TIPO: visualização
+#TABELA: tb_venda
+#---------------------------------------------------------------------------------------------------------------------------------
+class frm_visualizar_venda(FlaskForm):
+    valortotal_lote = StringField('Valor:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
+    cod_lote = SelectField('Lote:', coerce=int, choices=[(g.cod_lote, g.matricula_lote) for g in tb_lote.query.all()], render_kw={'readonly': True})
+    cod_cliente = SelectField('Lote:', coerce=int, choices=[(g.cod_cliente, g.nome_cliente) for g in tb_lote.query.all()], render_kw={'readonly': True})
+    qtdparcelas_venda = IntegerField('Qtd Parcelas:', [validators.DataRequired()], render_kw={'readonly': True})
+    valorparcela_venda = DecimalField('Valor Parcelas:', [validators.DataRequired()], render_kw={'readonly': True})
+    diavenc_venda = IntegerField('Dia Vencimento:', [validators.DataRequired()], render_kw={'readonly': True})
+    data_venda = DateField('Data Venda:', [validators.DataRequired()], render_kw={'readonly': True})
+    status_venda = SelectField('Situação:', coerce=int, choices=[(0, 'A Venda'),(1, 'Vendido')], render_kw={'readonly': True})
     salvar = SubmitField('Salvar')

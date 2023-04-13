@@ -12,9 +12,11 @@ from sqlalchemy import func
 from models import tb_user,\
     tb_usertype,\
     tb_clientes,\
-    tb_contratos,\
-    tb_contrato_arquivos,\
-    tb_aditivos
+    tb_terreno,\
+    tb_terreno_arquivos,\
+    tb_lote,\
+    tb_lote_arquivos,\
+    tb_venda
 from helpers import \
     frm_pesquisa, \
     frm_editar_senha,\
@@ -24,12 +26,14 @@ from helpers import \
     frm_editar_tipousuario,\
     frm_visualizar_cliente,\
     frm_editar_cliente,\
-    frm_editar_contrato,\
-    frm_visualizar_contrato,\
-    frm_editar_aditivo,\
-    frm_visualizar_aditivo,\
-    frm_editar_contrato_arquivo
-    
+    frm_editar_terreno,\
+    frm_visualizar_terreno,\
+    frm_editar_lote,\
+    frm_visualizar_lote,\
+    frm_editar_lote_arquivo,\
+    frm_editar_terreno_arquivo,\
+    frm_editar_venda,\
+    frm_visualizar_venda
 
 # ITENS POR PÁGINA
 from config import ROWS_PER_PAGE, CHAVE
@@ -609,20 +613,21 @@ def atualizarCliente():
         flash('Favor verificar os campos!','danger')
     return redirect(url_for('visualizarCliente', id=request.form['id']))
 
+
 ##################################################################################################################################
-#CONTRATOS
+#TERRENO
 ##################################################################################################################################
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: contrato
+#ROTA: terreno
 #FUNÇÃO: listar
 #PODE ACESSAR: administrador
 #---------------------------------------------------------------------------------------------------------------------------------
-@app.route('/contrato', methods=['POST','GET'])
-def contrato():
+@app.route('/terreno', methods=['POST','GET'])
+def cliente():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('evento')))         
+        return redirect(url_for('login',proxima=url_for('cliente')))         
     page = request.args.get('page', 1, type=int)
     form = frm_pesquisa()   
     pesquisa = form.pesquisa.data
@@ -630,283 +635,138 @@ def contrato():
         pesquisa = form.pesquisa_responsiva.data
     
     if pesquisa == "" or pesquisa == None:     
-        contratos = tb_contratos.query\
-        .join(tb_clientes, tb_clientes.cod_cliente==tb_contratos.cod_cliente)\
-        .add_columns(tb_clientes.nomerazao_cliente, tb_contratos.cod_contrato, tb_contratos.datavalidade_contrato, tb_contratos.status_contrato)\
-        .order_by(tb_contratos.datavalidade_contrato)\
+        terrenos = tb_terreno.query.order_by(tb_terreno.nome_terreno)\
         .paginate(page=page, per_page=ROWS_PER_PAGE , error_out=False)
     else:
-        contratos = tb_contratos.query\
-        .join(tb_clientes, tb_clientes.cod_cliente==tb_contratos.cod_cliente)\
-        .add_columns(tb_clientes.nomerazao_cliente, tb_contratos.cod_contrato, tb_contratos.datavalidade_contrato, tb_contratos.status_contrato)\
-        .order_by(tb_contratos.datavalidade_contrato)\
-        .filter(tb_contratos.nomerazao_cliente.ilike(f'%{pesquisa}%'))\
+        terrenos = tb_terreno.query.order_by(tb_clientes.nome_terreno)\
+        .filter(tb_terreno.nome_terreno.ilike(f'%{pesquisa}%'))\
         .paginate(page=page, per_page=ROWS_PER_PAGE, error_out=False)        
-    return render_template('contrato.html', titulo='Eventos', contratos=contratos, form=form)
+    return render_template('terreno.html', titulo='Terrenos', terrenos=terrenos, form=form)
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: novoContrato
+#ROTA: novoTerreno
 #FUNÇÃO: formulario de inclusão
 #PODE ACESSAR: administrador
 #---------------------------------------------------------------------------------------------------------------------------------
-@app.route('/novoContrato')
-def novoContrato():
+@app.route('/novoTerreno')
+def novoTerreno():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('novoContrato'))) 
-    form = frm_editar_contrato()
-    return render_template('novoContrato.html', titulo='Novo Contrato', form=form)
+        return redirect(url_for('login',proxima=url_for('novoTerreno'))) 
+    form = frm_editar_terreno()
+    return render_template('novoTerreno.html', titulo='Novo Terreno', form=form)
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: criarContrato
+#ROTA: criarTerreno
 #FUNÇÃO: inclusão no banco de dados
 #PODE ACESSAR: administrador
 #--------------------------------------------------------------------------------------------------------------------------------- 
-@app.route('/criarContrato', methods=['POST',])
-def criarContrato():
+@app.route('/criarTerreno', methods=['POST',])
+def criarTerreno():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('criarContrato')))     
-    form = frm_editar_contrato(request.form)
+        return redirect(url_for('login',proxima=url_for('criarTerreno')))     
+    form = frm_editar_terreno(request.form)
     if not form.validate_on_submit():
         flash('Por favor, preencha todos os dados','danger')
-        return redirect(url_for('criarContrato'))
-    cod_cliente  = form.cod_cliente.data
-    obj_contrato = form.obj_contrato.data
-    datavalidade_contrato = form.datavalidade_contrato.data
-    status_contrato = form.status_contrato.data
-    contrato = tb_contratos.query.filter_by(obj_contrato=obj_contrato).first()
-    if contrato:
-        flash ('Contrato já existe','danger')
-        return redirect(url_for('cliente')) 
-    novoContrato = tb_contratos(cod_cliente=cod_cliente,\
-                            obj_contrato = obj_contrato,\
-                            datavalidade_contrato = datavalidade_contrato,\
-                            status_contrato=status_contrato)
-    flash('Contrato criado com sucesso!','success')
-    db.session.add(novoContrato)
+        return redirect(url_for('novoTerreno'))
+    nome_terreno  = form.nome_terreno.data
+    end_terreno = form.end_terreno.data
+    num_terreno = form.numenum_terrenod_cliente.data
+    bairro_terreno = form.bairro_terreno.data
+    cidade_terreno = form.cidade_terreno.data
+    uf_terrreno = form.uf_terrreno.data
+    matricula_terreno = form.matricula_terreno.data
+    status_terreno = form.status_terreno.data
+
+    terreno = tb_terreno.query.filter_by(matricula_terreno=matricula_terreno).first()
+    if terreno:
+        flash ('Terreno já existe','danger')
+        return redirect(url_for('terreno')) 
+    novoTerreno = tb_terreno(nome_terreno=nome_terreno,\
+                            nomefantasia_cliente = nomefantasia_cliente,\
+                            end_terreno = end_terreno,\
+                            num_terreno = num_terreno,\
+                            bairro_terreno = bairro_terreno,\
+                            cidade_terreno = cidade_terreno,\
+                            uf_terrreno = uf_terrreno,\
+                            matricula_terreno = matricula_terreno,\
+                            status_terreno=status_terreno)
+    flash('Terreno criado com sucesso!','success')
+    db.session.add(novoTerreno)
     db.session.commit()
-    return redirect(url_for('contrato'))
+    return redirect(url_for('terreno'))
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: visualizarContrato
+#ROTA: visualizarTerreno
 #FUNÇÃO: formulario de visualização
 #PODE ACESSAR: administrador
 #--------------------------------------------------------------------------------------------------------------------------------- 
-@app.route('/visualizarContrato/<int:id>')
-def visualizarContrato(id):
+@app.route('/visualizarTerreno/<int:id>')
+def visualizarTerreno(id):
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('visualizarContrato')))  
-    contrato = tb_contratos.query.filter_by(cod_contrato=id).first()
-    contrato_arquivos = tb_contrato_arquivos.query.filter_by(cod_contrato=id).all()
-
-    aditivos = tb_aditivos.query.order_by(tb_aditivos.data_aditivo)\
-        .filter(tb_aditivos.cod_contrato == id)
-    nomes_arquivos = [arquivo.arquivo_contrato_arquivo for arquivo in contrato_arquivos]
-    form = frm_visualizar_contrato()
-    form.cod_cliente.data = contrato.cod_cliente
-    form.obj_contrato.data = contrato.obj_contrato
-    form.datavalidade_contrato.data = contrato.datavalidade_contrato
-    form.status_contrato.data = contrato.status_contrato
-    return render_template('visualizarContrato.html', titulo='Visualizar Contrato', id=id, form=form,nomes_arquivos=nomes_arquivos,contrato_arquivos=contrato_arquivos,aditivos=aditivos)   
+        return redirect(url_for('login',proxima=url_for('visualizarTerreno')))  
+    terreno = tb_terreno.query.filter_by(cod_terreno=id).first()
+    form = frm_visualizar_terreno()
+    form.nome_terreno.data = terreno.nome_terreno
+    form.end_terreno.data = terreno.end_terreno
+    form.num_terreno.data = terreno.num_terreno
+    form.bairro_terreno.data = terreno.bairro_terreno
+    form.cidade_terreno.data = terreno.cidade_terreno
+    form.uf_terrreno.data = terreno.uf_terrreno
+    form.matricula_terreno.data = terreno.matricula_terreno
+    form.status_terreno.data = terreno.status_status_terrenocliente
+    return render_template('visualizarTerreno.html', titulo='Visualizar Terreno', id=id, form=form)   
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: editarContrato
+#ROTA: editarTerreno
 ##FUNÇÃO: formulário de edição
 #PODE ACESSAR: administrador
 #---------------------------------------------------------------------------------------------------------------------------------
-@app.route('/editarContrato/<int:id>')
-def editarContrato(id):
+@app.route('/editarTerreno/<int:id>')
+def editarTerreno(id):
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('editarContrato')))  
-    contrato = tb_contratos.query.filter_by(cod_contrato=id).first()
-    form = frm_editar_contrato()
-    form.cod_cliente.data = contrato.cod_cliente
-    form.obj_contrato.data = contrato.obj_contrato
-    form.datavalidade_contrato.data = contrato.datavalidade_contrato
-    form.status_contrato.data = contrato.status_contrato
-    return render_template('editarContrato.html', titulo='Editar Contrato', id=id, form=form)   
+        return redirect(url_for('login',proxima=url_for('editarTerreno')))  
+    terreno = tb_terreno.query.filter_by(cod_terreno=id).first()
+    form = frm_editar_terreno()
+    form.nome_terreno.data = terreno.nome_terreno
+    form.end_terreno.data = terreno.end_terreno
+    form.num_terreno.data = terreno.num_terreno
+    form.bairro_terreno.data = terreno.bairro_terreno
+    form.cidade_terreno.data = terreno.cidade_terreno
+    form.uf_terrreno.data = terreno.uf_terrreno
+    form.matricula_terreno.data = terreno.matricula_terreno
+    form.status_terreno.data = terreno.status_status_terrenocliente
+    return render_template('editarTerreno.html', titulo='Editar Terreno', id=id, form=form)   
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: atualizarContrato
+#ROTA: atualizarTerreno
 #FUNÇÃO: alterar informações no banco de dados
 #PODE ACESSAR: administrador
 #---------------------------------------------------------------------------------------------------------------------------------
-@app.route('/atualizarContrato', methods=['POST',])
-def atualizarContrato():
+@app.route('/atualizarTerreno', methods=['POST',])
+def atualizarCliente():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('atualizarContrato')))      
-    form = frm_editar_contrato(request.form)
+        return redirect(url_for('login',proxima=url_for('atualizarTerreno')))      
+    form = frm_editar_terreno(request.form)
     if form.validate_on_submit():
         id = request.form['id']
-        contrato = tb_contratos.query.filter_by(cod_contrato=request.form['id']).first()
-        contrato.cod_cliente = form.cod_cliente.data
-        contrato.obj_contrato = form.obj_contrato.data
-        contrato.datavalidade_contrato = form.datavalidade_contrato.data
-        contrato.status_contrato = form.status_contrato.data
-        db.session.add(contrato)
+        terreno = tb_terreno.query.filter_by(cod_terreno=id).first()
+        terreno.nome_terreno = form.nome_terreno.data
+        terreno.end_terreno = form.end_terreno.data
+        terreno.num_terreno = form.num_terreno.data
+        terreno.bairro_terreno = form.bairro_terreno.data
+        terreno.cidade_terreno = form.cidade_terreno.data
+        terreno.uf_terrreno = form.uf_terrreno.data
+        terreno.matricula_terreno = form.matricula_terreno.data
+        terreno.complemento_cliente = form.complemento_cliente.data
+        terreno.status_terreno = form.status_terreno.data
+        db.session.add(terreno)
         db.session.commit()
-        flash('Contrato atualizado com sucesso!','success')
+        flash('Terreno atualizado com sucesso!','success')
     else:
         flash('Favor verificar os campos!','danger')
-    return redirect(url_for('visualizarContrato', id=request.form['id']))
-
-#---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: novoContratoArquivo
-#FUNÇÃO: inclusão de arquivos banco de dados
-#PODE ACESSAR: administrador
-#--------------------------------------------------------------------------------------------------------------------------------- 
-@app.route('/novoContratoArquivo/<int:id>')
-def novoContratoArquivo(id):
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('novoSolicitacaoFoto'))) 
-    form = frm_editar_contrato_arquivo()
-    return render_template('novoContratoArquivo.html', titulo='Inserir imagens', form=form, id=id)
-
-@app.route('/contrato_arquivo/<int:id>', methods=['POST'])
-def contrato_arquivo(id):
-    arquivo = request.files['arquivo_contrato_arquivo']
-    nome_arquivo = secure_filename(arquivo.filename)
-    nome_base, extensao = os.path.splitext(nome_arquivo)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-    nome_unico = f"{nome_base}_{timestamp}{extensao}"
-    caminho_arquivo = os.path.join(app.config['UPLOAD_PATH'], nome_unico)
-    arquivo.save(caminho_arquivo)
-
-    flash('Arquivo carregado com sucesso!','success')
-    novoContratoArquivo = tb_contrato_arquivos(cod_contrato=id,arquivo_contrato_arquivo=nome_unico)
-    db.session.add(novoContratoArquivo)
-    db.session.commit()
-    return redirect(url_for('novoContratoArquivo',id=id))
-
-
-@app.route('/excluirArquivo/<int:id>')
-def excluirArquivo(id):
-    arquivo_foto = tb_contrato_arquivos.query.filter_by(cod_contrato_arquivo=id).first()
-    idcontrato = arquivo_foto.cod_solicitacao
-    caminho_arquivo = os.path.join(app.config['UPLOAD_PATH'], arquivo_foto.arquivo_contrato_arquivo)
-    try:
-        os.remove(caminho_arquivo)
-        msg = "Arquivo excluído com sucesso!"
-    except Exception as e:
-        msg = f"Ocorreu um erro ao excluir o arquivo: {e}"
-
-    apagarArqvuio = tb_contrato_arquivos.query.filter_by(cod_contrato_arquivo=id).one()
-    db.session.delete(apagarArqvuio)
-    db.session.commit()
-
-    flash('Arquivo apagado com sucesso!','success')
-    return redirect(url_for('visualizarContrato',id=idcontrato))
-
-
-##################################################################################################################################
-#ADITIVOS
-##################################################################################################################################
-
-#---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: novoAditivo
-#FUNÇÃO: formulario de inclusão
-#PODE ACESSAR: administrador
-#---------------------------------------------------------------------------------------------------------------------------------
-@app.route('/novoAditivo/<int:id>')
-def novoAditivo(id):
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('novoAditivo'))) 
-    form = frm_editar_aditivo()
-    return render_template('novoAditivo.html', titulo='Novo Aditivo', form=form,id=id)
-
-#---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: criarAditivo
-#FUNÇÃO: inclusão no banco de dados
-#PODE ACESSAR: administrador
-#--------------------------------------------------------------------------------------------------------------------------------- 
-@app.route('/criarAditivo/<int:id>', methods=['POST',])
-def criarAditivo(id):
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('criarAditivo')))     
-    form = frm_editar_aditivo(request.form)
-    if not form.validate_on_submit():
-        flash('Por favor, preencha todos os dados','danger')
-        return redirect(url_for('criarContrato'))
-    cod_contrato  = id
-    desc_aditivo = form.desc_aditivo.data
-    data_aditivo = form.data_aditivo.data
-    status_aditivo = form.status_aditivo.data
-    aditivo = tb_aditivos.query.filter_by(desc_aditivo=desc_aditivo).first()
-    if aditivo:
-        flash ('Aditivo já existe','danger')
-        return redirect(url_for('aditivo')) 
-    novoAditivo = tb_aditivos(cod_contrato=cod_contrato,\
-                            desc_aditivo = desc_aditivo,\
-                            data_aditivo = data_aditivo,\
-                            status_aditivo=status_aditivo)
-    flash('Aditivo criado com sucesso!','success')
-    db.session.add(novoAditivo)
-    db.session.commit()
-    return redirect(url_for('visualizarContrato',id=id))
-
-#---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: visualizarAditivo
-#FUNÇÃO: formulario de visualização
-#PODE ACESSAR: administrador
-#--------------------------------------------------------------------------------------------------------------------------------- 
-@app.route('/visualizarAditivo/<int:id>')
-def visualizarAditivo(id):
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('visualizarAditivo')))  
-    aditivo = tb_aditivos.query.filter_by(cod_aditivo=id).first()
-    idcontrato = aditivo.cod_contrato
-    form = frm_visualizar_aditivo()
-    form.desc_aditivo.data = aditivo.desc_aditivo
-    form.data_aditivo.data = aditivo.data_aditivo
-    form.status_aditivo.data = aditivo.status_aditivo
-    return render_template('visualizarAditivo.html', titulo='Visualizar Aditivo', id=id, form=form, idcontrato=idcontrato)   
-
-#---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: editarAditivo
-##FUNÇÃO: formulário de edição
-#PODE ACESSAR: administrador
-#---------------------------------------------------------------------------------------------------------------------------------
-@app.route('/editarAditivo/<int:id>')
-def editarAditivo(id):
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('editarAditivo')))  
-    aditivo = tb_aditivos.query.filter_by(cod_aditivo=id).first()
-    idcontrato = aditivo.cod_contrato
-    form = frm_editar_aditivo()
-    form.desc_aditivo.data = aditivo.desc_aditivo
-    form.data_aditivo.data = aditivo.data_aditivo
-    form.status_aditivo.data = aditivo.status_aditivo
-    return render_template('editarAditivo.html', titulo='Editar Aditivo', id=id, form=form)   
-
-#---------------------------------------------------------------------------------------------------------------------------------
-#ROTA: atualizarAditivo
-#FUNÇÃO: alterar informações no banco de dados
-#PODE ACESSAR: administrador
-#---------------------------------------------------------------------------------------------------------------------------------
-@app.route('/atualizarAditivo', methods=['POST',])
-def atualizarAditivo():
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('atualizarAditivo')))      
-    form = frm_editar_aditivo(request.form)
-    if form.validate_on_submit():
-        id = request.form['id']
-        aditivo = tb_aditivos.query.filter_by(cod_aditivo=id).first()
-        aditivo.desc_aditivo = form.desc_aditivo.data
-        aditivo.data_aditivo = form.data_aditivo.data
-        aditivo.status_aditivo = form.status_aditivo.data
-        db.session.add(aditivo)
-        db.session.commit()
-        flash('Aditivo atualizado com sucesso!','success')
-    else:
-        flash('Favor verificar os campos!','danger')
-    return redirect(url_for('visualizarAditivo', id=request.form['id']))
+    return redirect(url_for('visualizarTerreno', id=request.form['id']))
