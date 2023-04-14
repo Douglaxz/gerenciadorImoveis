@@ -224,7 +224,6 @@ class frm_editar_lote_arquivo(FlaskForm):
 #---------------------------------------------------------------------------------------------------------------------------------
 class frm_editar_venda(FlaskForm):
     cod_lote = SelectField('Lote:', coerce=int, choices=[(g.cod_lote, g.matricula_lote) for g in tb_lote.query.all()])
-    cod_cliente = SelectField('Lote:', coerce=int, choices=[(g.cod_cliente, g.nome_cliente) for g in tb_lote.query.all()])
     qtdparcelas_venda = IntegerField('Qtd Parcelas:', [validators.DataRequired()], render_kw={"placeholder": "digite o total de parcelas"})
     valorparcela_venda = DecimalField('Valor Parcelas:', [validators.DataRequired()], render_kw={"placeholder": "digite o total de parcelas"})
     diavenc_venda = IntegerField('Dia Vencimento:', [validators.DataRequired()], render_kw={"placeholder": "digite o total de parcelas"})
@@ -240,7 +239,6 @@ class frm_editar_venda(FlaskForm):
 class frm_visualizar_venda(FlaskForm):
     valortotal_lote = StringField('Valor:', [validators.DataRequired(), validators.Length(min=1, max=50)], render_kw={'readonly': True})
     cod_lote = SelectField('Lote:', coerce=int, choices=[(g.cod_lote, g.matricula_lote) for g in tb_lote.query.all()], render_kw={'readonly': True})
-    cod_cliente = SelectField('Lote:', coerce=int, choices=[(g.cod_cliente, g.nome_cliente) for g in tb_lote.query.all()], render_kw={'readonly': True})
     qtdparcelas_venda = IntegerField('Qtd Parcelas:', [validators.DataRequired()], render_kw={'readonly': True})
     valorparcela_venda = DecimalField('Valor Parcelas:', [validators.DataRequired()], render_kw={'readonly': True})
     diavenc_venda = IntegerField('Dia Vencimento:', [validators.DataRequired()], render_kw={'readonly': True})

@@ -89,25 +89,25 @@
   <table class="table table-bordered table-responsiv table-hover">
       <thead>
           <tr>
-            <th width="10%">Data</th>
-            <th width="70%">Descritivo</th>
+            <th width="40%">Matrícula</th>
+            <th width="40%">Valor</th>
             <th width="10%">Status</th>
             <th width="10%">Ações</th>
           </tr>
       </thead>
       <tbody>
-          {% for lotes in aditivos %}
+          {% for lote in lotes %}
           <tr>
-              <td class="text-left">{{ aditivo.data_aditivo.strftime('%d/%m/%Y') }}</td>
-              <td class="text-left">{{ aditivo.desc_aditivo }}</td>
+              <td class="text-left">{{ lote.matricula_lote }}</td>
+              <td class="text-left">{{ lote.valortotal_lote }}</td>
               <td class="text-left">
-                {% if aditivo.status_aditivo == 0: %}
+                {% if lote.status_lote == 0: %}
                 <i class="btn bi bi-toggle-on text-success" style="font-size:2rem; color:white;">
                 {% else %}
                 <i class="btn bi bi-toggle-off text-danger" style="font-size:2rem; color:white;">
                 {% endif %}                       
               <td>
-                <a class="btn" href="{{url_for('visualizarAditivo',id=aditivo.cod_aditivo)}}"><i class="bi bi-eye" style="font-size:1.5rem; color:black;"></i></a>
+                <a class="btn" href="{{url_for('visualizarLote',id=lote.cod_lote)}}"><i class="bi bi-eye" style="font-size:1.5rem; color:black;"></i></a>
             </td>              
           </tr>
           {% endfor %}

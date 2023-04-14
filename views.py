@@ -787,7 +787,7 @@ def novoTerrenoArquivo(id):
         flash('Sessão expirou, favor logar novamente','danger')
         return redirect(url_for('login',proxima=url_for('novoSolicitacaoFoto'))) 
     form = frm_editar_terreno_arquivo()
-    return render_template('novoTerrenoArquivo.html', titulo='Inserir imagens', form=form, id=id)
+    return render_template('novoTerrenoArquivo.html', titulo='Inserir Arquivo', form=form, id=id)
 
 @app.route('/terreno_arquivo/<int:id>', methods=['POST'])
 def terreno_arquivo(id):
@@ -849,24 +849,26 @@ def novoLote(id):
 #--------------------------------------------------------------------------------------------------------------------------------- 
 @app.route('/criarLote', methods=['POST',])
 def criarLote():
+    id = request.form['id']
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
         return redirect(url_for('login',proxima=url_for('criarTerreno')))     
-    form = frm_editar_terreno(request.form)
+    form = frm_editar_lote(request.form)
     if not form.validate_on_submit():
         flash('Por favor, preencha todos os dados','danger')
         return redirect(url_for('novoTerreno'))
     valortotal_lote  = form.valortotal_lote.data
     matricula_lote = form.matricula_lote.data
-    status_aditivo = form.status_aditivo.data
+    status_lote = form.status_lote.data
 
     lote = tb_lote.query.filter_by(matricula_lote=matricula_lote).first()
     if lote:
         flash ('Terreno já existe','danger')
         return redirect(url_for('terreno')) 
-    novoLote = tb_terreno(valortotal_lote=valortotal_lote,\
+    novoLote = tb_lote(valortotal_lote=valortotal_lote,\
                             matricula_lote = matricula_lote,\
-                            status_aditivo=status_aditivo)
+                            cod_terreno = id,\
+                            status_lote=status_lote)
     flash('Lote criado com sucesso!','success')
     db.session.add(novoLote)
     db.session.commit()
@@ -884,16 +886,12 @@ def visualizarLote(id):
         return redirect(url_for('login',proxima=url_for('visualizarLote')))  
     lote = tb_lote.query.filter_by(cod_lote=id).first()
 
-    #terreno_arquivos = tb_terreno_arquivo.query.filter_by(cod_terreno=id).all()
-
-    #lotes = tb_lote.query.order_by(tb_lote.cod_lote)\
-    #    .filter(tb_lote.cod_terreno == id)
-
+    idterreno = lote.cod_terreno
     form = frm_visualizar_lote()
     form.valortotal_lote.data = lote.valortotal_lote
     form.matricula_lote.data = lote.matricula_lote
     form.status_lote.data = lote.status_lote
-    return render_template('visualizarLote.html', titulo='Visualizar Lote', id=id, form=form)   
+    return render_template('visualizarLote.html', titulo='Visualizar Lote', id=id, form=form, idterreno=idterreno)   
 
 #---------------------------------------------------------------------------------------------------------------------------------
 #ROTA: editarLote
@@ -904,7 +902,8 @@ def visualizarLote(id):
 def editarLote(id):
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('editarLote')))  
+        return redirect(url_for('login',proxima=url_for('editarLote'))) 
+    
     lote = tb_lote.query.filter_by(cod_lote=id).first()
     form = frm_editar_lote()
     form.valortotal_lote.data = lote.valortotal_lote
@@ -926,9 +925,9 @@ def atualizarLote():
     if form.validate_on_submit():
         id = request.form['id']
         lote = tb_lote.query.filter_by(cod_lote=id).first()
-        form.valortotal_lote.data = lote.valortotal_lote
-        form.matricula_lote.data = lote.matricula_lote
-        form.status_lote.data = lote.status_lote
+        lote.valortotal_lote = form.valortotal_lote.data
+        lote.matricula_lote = form.matricula_lote.data
+        lote.status_lote = form.status_lote.data
         db.session.add(lote)
         db.session.commit()
         flash('Lote atualizado com sucesso!','success')
