@@ -11,12 +11,14 @@ db.create_all()
 from sqlalchemy import func
 from models import tb_user,\
     tb_usertype,\
-    tb_clientes,\
+    tb_cliente,\
     tb_terreno,\
     tb_terreno_arquivo,\
     tb_lote,\
     tb_lote_arquivo,\
-    tb_venda
+    tb_venda,\
+    tb_venda_arquivo,\
+    tb_venda_parcela
 from helpers import \
     frm_pesquisa, \
     frm_editar_senha,\
@@ -33,7 +35,8 @@ from helpers import \
     frm_editar_lote_arquivo,\
     frm_editar_terreno_arquivo,\
     frm_editar_venda,\
-    frm_visualizar_venda
+    frm_visualizar_venda,\
+    frm_editar_venda_arquivo
 
 # ITENS POR PÁGINA
 from config import ROWS_PER_PAGE, CHAVE
@@ -470,11 +473,11 @@ def cliente():
         pesquisa = form.pesquisa_responsiva.data
     
     if pesquisa == "" or pesquisa == None:     
-        clientes = tb_clientes.query.order_by(tb_clientes.nomerazao_cliente)\
+        clientes = tb_cliente.query.order_by(tb_cliente.nome_cliente)\
         .paginate(page=page, per_page=ROWS_PER_PAGE , error_out=False)
     else:
-        clientes = tb_clientes.query.order_by(tb_clientes.nomerazao_cliente)\
-        .filter(tb_clientes.nomerazao_cliente.ilike(f'%{pesquisa}%'))\
+        clientes = tb_cliente.query.order_by(tb_cliente.nome_cliente)\
+        .filter(tb_cliente.nomerazao_cliente.ilike(f'%{pesquisa}%'))\
         .paginate(page=page, per_page=ROWS_PER_PAGE, error_out=False)        
     return render_template('cliente.html', titulo='Cliente', clientes=clientes, form=form)
 
@@ -505,29 +508,31 @@ def criarCliente():
     if not form.validate_on_submit():
         flash('Por favor, preencha todos os dados','danger')
         return redirect(url_for('criarCliente'))
-    nomerazao_cliente  = form.nomerazao_cliente.data
-    nomefantasia_cliente = form.nomefantasia_cliente.data
+    nome_cliente  = form.nome_cliente.data
     end_cliente = form.end_cliente.data
     numend_cliente = form.numend_cliente.data
     bairro_cliente = form.bairro_cliente.data
     cidade_cliente = form.cidade_cliente.data
     uf_cliente = form.uf_cliente.data
     complemento_cliente = form.complemento_cliente.data
-    cnpj_cliente = form.nomerazao_cliente.data
+    cpf_cliente = form.cpf_cliente.data
+    fone_cliente = form.fone_cliente.data
+    email_cliente = form.email_cliente.data
     status = form.status.data
-    cliente = tb_clientes.query.filter_by(cnpj_cliente=cnpj_cliente).first()
+    cliente = tb_cliente.query.filter_by(cpf_cliente=cpf_cliente).first()
     if cliente:
         flash ('Patrocinador já existe','danger')
         return redirect(url_for('cliente')) 
-    novoCliente = tb_clientes(nomerazao_cliente=nomerazao_cliente,\
-                            nomefantasia_cliente = nomefantasia_cliente,\
+    novoCliente = tb_cliente(nome_cliente=nome_cliente,\
                             end_cliente = end_cliente,\
                             numend_cliente = numend_cliente,\
                             bairro_cliente = bairro_cliente,\
                             cidade_cliente = cidade_cliente,\
                             uf_cliente = uf_cliente,\
                             complemento_cliente = complemento_cliente,\
-                            cnpj_cliente = cnpj_cliente,\
+                            cpf_cliente = cpf_cliente,\
+                            fone_cliente = fone_cliente,\
+                            email_cliente = email_cliente,\
                             status_cliente=status)
     flash('Cliente criado com sucesso!','success')
     db.session.add(novoCliente)
@@ -544,17 +549,18 @@ def visualizarCliente(id):
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
         return redirect(url_for('login',proxima=url_for('visualizarCliente')))  
-    cliente = tb_clientes.query.filter_by(cod_cliente=id).first()
+    cliente = tb_cliente.query.filter_by(cod_cliente=id).first()
     form = frm_visualizar_cliente()
-    form.nomerazao_cliente.data = cliente.nomerazao_cliente
-    form.nomefantasia_cliente.data = cliente.nomefantasia_cliente
+    form.nome_cliente.data = cliente.nome_cliente
     form.end_cliente.data = cliente.end_cliente
     form.numend_cliente.data = cliente.numend_cliente
     form.bairro_cliente.data = cliente.bairro_cliente
     form.cidade_cliente.data = cliente.cidade_cliente
     form.uf_cliente.data = cliente.uf_cliente
     form.complemento_cliente.data = cliente.complemento_cliente
-    form.cnpj_cliente.data = cliente.cnpj_cliente
+    form.cpf_cliente.data = cliente.cpf_cliente
+    form.fone_cliente.data = cliente.fone_cliente
+    form.email_cliente.data = cliente.email_cliente
     form.status.data = cliente.status_cliente
     return render_template('visualizarCliente.html', titulo='Visualizar Cliente', id=id, form=form)   
 
@@ -568,17 +574,18 @@ def editarCliente(id):
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
         return redirect(url_for('login',proxima=url_for('editarCliente')))  
-    cliente = tb_clientes.query.filter_by(cod_cliente=id).first()
+    cliente = tb_cliente.query.filter_by(cod_cliente=id).first()
     form = frm_editar_cliente()
-    form.nomerazao_cliente.data = cliente.nomerazao_cliente
-    form.nomefantasia_cliente.data = cliente.nomefantasia_cliente
+    form.nome_cliente.data = cliente.nome_cliente
     form.end_cliente.data = cliente.end_cliente
     form.numend_cliente.data = cliente.numend_cliente
     form.bairro_cliente.data = cliente.bairro_cliente
     form.cidade_cliente.data = cliente.cidade_cliente
     form.uf_cliente.data = cliente.uf_cliente
     form.complemento_cliente.data = cliente.complemento_cliente
-    form.cnpj_cliente.data = cliente.cnpj_cliente
+    form.cpf_cliente.data = cliente.cpf_cliente
+    form.fone_cliente.data = cliente.fone_cliente
+    form.email_cliente.data = cliente.email_cliente    
     form.status.data = cliente.status_cliente
     return render_template('editarCliente.html', titulo='Editar Cliente', id=id, form=form)   
 
@@ -595,16 +602,17 @@ def atualizarCliente():
     form = frm_editar_cliente(request.form)
     if form.validate_on_submit():
         id = request.form['id']
-        cliente = tb_clientes.query.filter_by(cod_cliente=request.form['id']).first()
-        cliente.nomerazao_cliente = form.nomerazao_cliente.data
-        cliente.nomefantasia_cliente = form.nomefantasia_cliente.data
+        cliente = tb_cliente.query.filter_by(cod_cliente=request.form['id']).first()
+        cliente.nome_cliente = form.nome_cliente.data
         cliente.end_cliente = form.end_cliente.data
         cliente.numend_cliente = form.numend_cliente.data
         cliente.bairro_cliente = form.bairro_cliente.data
         cliente.cidade_cliente = form.cidade_cliente.data
         cliente.uf_cliente = form.uf_cliente.data
         cliente.complemento_cliente = form.complemento_cliente.data
-        cliente.cnpj_cliente = form.cnpj_cliente.data
+        cliente.cpf_cliente = form.cpf_cliente.data
+        cliente.fone_cliente = form.fone_cliente.data
+        cliente.email_cliente = form.email_cliente.data
         cliente.status_cliente = form.status.data
         db.session.add(cliente)
         db.session.commit()
@@ -627,7 +635,7 @@ def atualizarCliente():
 def terreno():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         flash('Sessão expirou, favor logar novamente','danger')
-        return redirect(url_for('login',proxima=url_for('cliente')))         
+        return redirect(url_for('login',proxima=url_for('terreno')))         
     page = request.args.get('page', 1, type=int)
     form = frm_pesquisa()   
     pesquisa = form.pesquisa.data
@@ -638,7 +646,7 @@ def terreno():
         terrenos = tb_terreno.query.order_by(tb_terreno.nome_terreno)\
         .paginate(page=page, per_page=ROWS_PER_PAGE , error_out=False)
     else:
-        terrenos = tb_terreno.query.order_by(tb_clientes.nome_terreno)\
+        terrenos = tb_terreno.query.order_by(tb_cliente.nome_terreno)\
         .filter(tb_terreno.nome_terreno.ilike(f'%{pesquisa}%'))\
         .paginate(page=page, per_page=ROWS_PER_PAGE, error_out=False)        
     return render_template('terreno.html', titulo='Terrenos', terrenos=terrenos, form=form)
@@ -982,3 +990,269 @@ def excluirLoteArquivo(id):
 
     flash('Arquivo apagado com sucesso!','success')
     return redirect(url_for('visualizarLote',id=idlote))
+
+##################################################################################################################################
+#VENDA
+##################################################################################################################################
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: venda
+#FUNÇÃO: listar
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/venda', methods=['POST','GET'])
+def venda():
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('venda')))         
+    page = request.args.get('page', 1, type=int)
+    form = frm_pesquisa()   
+    pesquisa = form.pesquisa.data
+    if pesquisa == "":
+        pesquisa = form.pesquisa_responsiva.data
+    
+    if pesquisa == "" or pesquisa == None:     
+        vendas = tb_venda.query.order_by(tb_venda.data_venda)\
+        .paginate(page=page, per_page=ROWS_PER_PAGE , error_out=False)
+
+        vendas = tb_venda.query\
+        .join(tb_cliente, tb_cliente.cod_cliente==tb_venda.cod_cliente)\
+        .join(tb_lote, tb_lote.cod_lote==tb_venda.cod_lote)\
+        .add_columns(tb_venda.data_venda, tb_venda.cod_venda, tb_cliente.nome_cliente, tb_lote.matricula_lote, tb_venda.status_venda)\
+        .order_by(tb_venda.data_venda)\
+        .paginate(page=page, per_page=ROWS_PER_PAGE, error_out=False)        
+    else:
+        vendas = tb_venda.query\
+        .filter(tb_venda.data_venda.ilike(f'%{pesquisa}%'))\
+        .join(tb_cliente, tb_cliente.cod_cliente==tb_venda.cod_cliente)\
+        .join(tb_lote, tb_lote.cod_lote==tb_venda.cod_lote)\
+        .add_columns(tb_venda.data_venda, tb_venda.cod_venda, tb_cliente.nome_cliente, tb_lote.matricula_lote, tb_venda.status_venda)\
+        .order_by(tb_venda.data_venda)\
+        .paginate(page=page, per_page=ROWS_PER_PAGE, error_out=False)       
+    return render_template('venda.html', titulo='Vendas', vendas=vendas, form=form)
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: novoVenda
+#FUNÇÃO: formulario de inclusão
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/novoVenda')
+def novoVenda():
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('novoVenda'))) 
+    form = frm_editar_venda()
+    return render_template('novoVenda.html', titulo='Nova Venda', form=form)
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: criarVenda
+#FUNÇÃO: inclusão no banco de dados
+#PODE ACESSAR: administrador
+#--------------------------------------------------------------------------------------------------------------------------------- 
+@app.route('/criarVenda', methods=['POST',])
+def criarVenda():
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('criarVenda')))     
+    form = frm_editar_venda(request.form)
+    if not form.validate_on_submit():
+        flash('Por favor, preencha todos os dados','danger')
+        return redirect(url_for('novoVenda'))
+    cod_lote  = form.cod_lote.data
+    cod_cliente = form.cod_cliente.data
+    qtdparcelas_venda = form.qtdparcelas_venda.data
+    valorparcela_venda = form.valorparcela_venda.data
+    diavenc_venda = form.diavenc_venda.data
+    data_venda = form.data_venda.data
+    status_venda = form.status_venda.data
+
+    venda = tb_venda.query.filter_by(cod_lote=cod_lote).first()
+    if venda:
+        flash ('Esse lote já foi vendido','danger')
+        return redirect(url_for('venda')) 
+    novoVenda = tb_venda(cod_lote=cod_lote,\
+                            cod_cliente = cod_cliente,\
+                            qtdparcelas_venda = qtdparcelas_venda,\
+                            valorparcela_venda = valorparcela_venda,\
+                            diavenc_venda = diavenc_venda,\
+                            data_venda = data_venda,\
+                            status_venda=status_venda)
+    flash('Venda criada com sucesso!','success')
+    db.session.add(novoVenda)
+    db.session.commit()
+    return redirect(url_for('venda'))
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: visualizarVenda
+#FUNÇÃO: formulario de visualização
+#PODE ACESSAR: administrador
+#--------------------------------------------------------------------------------------------------------------------------------- 
+@app.route('/visualizarVenda/<int:id>')
+def visualizarVenda(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('visualizarVenda')))  
+    venda = tb_venda.query.filter_by(cod_venda=id).first()
+
+    venda_arquivos = tb_venda_arquivo.query.filter_by(cod_venda=id).all()
+
+    venda_parcelas = tb_venda_parcela.query.order_by(tb_venda_parcela.datavenc_vendaparcela)\
+        .filter(tb_venda_parcela.cod_venda == id)
+
+    form = frm_visualizar_venda()
+    form.cod_lote.data = venda.cod_lote
+    form.cod_cliente.data = venda.cod_cliente
+    form.qtdparcelas_venda.data = venda.qtdparcelas_venda
+    form.valorparcela_venda.data = venda.valorparcela_venda
+    form.diavenc_venda.data = venda.diavenc_venda
+    form.data_venda.data = venda.data_venda
+    form.status_venda.data = venda.status_venda
+    return render_template('visualizarVenda.html', titulo='Visualizar Venda', id=id, form=form, venda_arquivos=venda_arquivos,venda_parcelas=venda_parcelas )   
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: editarVenda
+##FUNÇÃO: formulário de edição
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/editarVenda/<int:id>')
+def editarVenda(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('editarVenda')))  
+    venda = tb_venda.query.filter_by(cod_venda=id).first()
+    form = frm_editar_venda()
+    form.cod_lote.data = venda.cod_lote
+    form.cod_cliente.data = venda.cod_cliente
+    form.qtdparcelas_venda.data = venda.qtdparcelas_venda
+    form.valorparcela_venda.data = venda.valorparcela_venda
+    form.diavenc_venda.data = venda.diavenc_venda
+    form.data_venda.data = venda.data_venda
+    form.status_venda.data = venda.status_venda
+    return render_template('editarVenda.html', titulo='Editar Venda', id=id, form=form)   
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: atualizarVenda
+#FUNÇÃO: alterar informações no banco de dados
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/atualizarVenda', methods=['POST',])
+def atualizarVenda():
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('atualizarVenda')))      
+    form = frm_editar_venda(request.form)
+    if form.validate_on_submit():
+        id = request.form['id']
+        venda = tb_venda.query.filter_by(cod_venda=id).first()
+        venda.cod_lote = form.cod_lote.data
+        venda.cod_cliente = form.cod_cliente.data
+        venda.qtdparcelas_venda = form.qtdparcelas_venda.data
+        venda.valorparcela_venda = form.valorparcela_venda.data
+        venda.diavenc_venda = form.diavenc_venda.data
+        venda.data_venda = form.data_venda.data
+        venda.status_venda = form.status_venda.data
+        db.session.add(venda)
+        db.session.commit()
+        flash('Venda atualizado com sucesso!','success')
+    else:
+        flash('Favor verificar os campos!','danger')
+    return redirect(url_for('visualizarVenda', id=request.form['id']))
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: novoVendaArquivo
+#FUNÇÃO: inclusão de arquivos banco de dados
+#PODE ACESSAR: administrador
+#--------------------------------------------------------------------------------------------------------------------------------- 
+@app.route('/novoVendaArquivo/<int:id>')
+def novoVendaArquivo(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('novoSolicitacaoFoto'))) 
+    form = frm_editar_venda_arquivo()
+    return render_template('novoVendaArquivo.html', titulo='Inserir Arquivo', form=form, id=id)
+
+@app.route('/venda_arquivo/<int:id>', methods=['POST'])
+def venda_arquivo(id):
+    arquivo = request.files['arquivo_terreno_arquivo']
+    nome_arquivo = secure_filename(arquivo.filename)
+    nome_base, extensao = os.path.splitext(nome_arquivo)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+    nome_unico = f"{nome_base}_{timestamp}{extensao}"
+    caminho_arquivo = os.path.join(app.config['UPLOAD_PATH'], nome_unico)
+    arquivo.save(caminho_arquivo)
+
+    flash('Arquivo carregado com sucesso!','success')
+    novoTerrenoArquivo = tb_terreno_arquivo(cod_terreno=id,arquivo_terreno_arquivo=nome_unico)
+    db.session.add(novoTerrenoArquivo)
+    db.session.commit()
+    return redirect(url_for('novoVendaArquivo',id=id))
+
+
+@app.route('/excluirArquivoVenda/<int:id>')
+def excluirArquivoVenda(id):
+    arquivo = tb_venda_arquivo.query.filter_by(cod_venda_arquivo=id).first()
+    idvenda = arquivo.cod_venda
+    caminho_arquivo = os.path.join(app.config['UPLOAD_PATH'], arquivo.arquivo_terreno_arquivo)
+    try:
+        os.remove(caminho_arquivo)
+        msg = "Arquivo excluído com sucesso!"
+    except Exception as e:
+        msg = f"Ocorreu um erro ao excluir o arquivo: {e}"
+
+    apagarArqvuio = tb_venda_arquivo.query.filter_by(cod_venda_arquivo=id).one()
+    db.session.delete(apagarArqvuio)
+    db.session.commit()
+
+    flash('Arquivo apagado com sucesso!','success')
+    return redirect(url_for('visualizarVenda',id=idvenda))
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: atualizarVendaParcela
+#FUNÇÃO: formulario de inclusão
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/atualizarVendaParcela/<int:id>')
+def atualizarVendaParcela(id):
+    venda = tb_venda.query.filter_by(cod_venda=id).first()
+    parcelas = venda.qtdparcelas_venda
+    diavencimento = venda.diavenc_venda
+    mes = venda.data_venda.month + 1
+    ano = venda.data_venda.year
+    msg = ""
+    cod_venda = id
+    status_vendaparcela = 0
+    valorparcela_vendaparcela = venda.valorparcela_venda
+
+    verificarparcelas = tb_venda_parcela.query.filter_by(cod_venda=id).all()
+    if verificarparcelas:
+        for parcela in verificarparcelas:
+            db.session.delete(parcela)
+        db.session.commit()
+
+    for i in range(parcelas):
+        novadata = str(diavencimento) + "/" + str(mes) + "/" + str(ano)
+        datavenc_vendaparcela = datetime.strptime(novadata, "%d/%m/%Y").date()
+        parcela = tb_venda_parcela.query.filter_by(cod_venda=cod_venda, datavenc_vendaparcela=datavenc_vendaparcela).first()
+        alerta = 1
+        if parcela == None:
+            alerta = 2
+            
+            novoParcela = tb_venda_parcela(cod_venda=cod_venda,\
+                                    datavenc_vendaparcela = datavenc_vendaparcela,\
+                                    valorparcela_vendaparcela = valorparcela_vendaparcela,\
+                                    status_vendaparcela=status_vendaparcela)
+            db.session.add(novoParcela)
+            db.session.commit()        
+
+        mes = mes + 1
+        if(mes==13):
+            mes = 1
+            ano = ano + 1
+   
+    
+    return redirect(url_for('visualizarVenda',id=id))
+
+
+@app.route('/visualizarVendaParcela/<int:id>')
+def visualizarVendaParcela(id):
+    pass

@@ -28,13 +28,12 @@ class tb_usertype(db.Model):
         return '<Name %r>' % self.name    
  
 #---------------------------------------------------------------------------------------------------------------------------------
-#TABELA: CLIENTES
+#TABELA: CLIENTE
 #ORIGEM: BANCO DE DADOS
 #---------------------------------------------------------------------------------------------------------------------------------
-class tb_clientes(db.Model):
+class tb_cliente(db.Model):
     cod_cliente = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nome_cliente = db.Column(db.String(50), nullable=False)
-    nomefantasia_cliente = db.Column(db.String(50), nullable=False)
     end_cliente = db.Column(db.String(50), nullable=False)
     numend_cliente = db.Column(db.String(50), nullable=False)
     bairro_cliente = db.Column(db.String(50), nullable=False)
@@ -43,6 +42,8 @@ class tb_clientes(db.Model):
     complemento_cliente = db.Column(db.String(50), nullable=False)
     cpf_cliente = db.Column(db.String(50), nullable=False)
     status_cliente = db.Column(db.Integer, nullable=False)
+    fone_cliente = db.Column(db.String(50), nullable=False)
+    email_cliente = db.Column(db.String(50), nullable=False)
     def __repr__(self):
         return '<Name %r>' % self.name    
 
@@ -122,10 +123,21 @@ class tb_venda(db.Model):
 class tb_venda_parcela(db.Model):
     cod_vendaparcela = db.Column(db.Integer, primary_key=True, autoincrement=True)
     cod_venda = db.Column(db.Integer, nullable=False)
-    cod_cliente = db.Column(db.Integer, nullable=False)
     status_vendaparcela = db.Column(db.String(50), nullable=False)
     valorparcela_vendaparcela = db.Column(db.Float, nullable=False)
     datavenc_vendaparcela = db.Column(db.Integer, nullable=False)
     datapag_vendaparcela = db.Column(db.Integer, nullable=False)
     def __repr__(self):
         return '<Name %r>' % self.name
+
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#TABELA: VENDA
+#ORIGEM: BANCO DE DADOS
+#---------------------------------------------------------------------------------------------------------------------------------
+class tb_venda_arquivo(db.Model):
+    cod_venda_arquivo = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    cod_venda = db.Column(db.Integer, nullable=False)
+    arquivo_venda_arquivo = db.Column(db.String(50), nullable=False)
+    def __repr__(self):
+        return '<Name %r>' % self.name   

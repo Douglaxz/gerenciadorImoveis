@@ -1,0 +1,115 @@
+{% extends "template.html"%}
+{% block conteudo %}
+<div class="box_cabecalho">
+  <div class="box_titulo_interno">
+    <i class="bi bi-bag" data-toggle="tooltip" data-placement="right"></i> {{ titulo }}
+  </div>
+  <div class="box_botoes">
+    <a class="btn btn_titulo" href="{{url_for('editarVenda',id=id)}}"><i class="bi bi-pencil" style="font-size:1.5rem; color:white;"></i></a>
+  </div>
+  <div class="box_botoes">
+    <a class="btn btn_titulo" href="{{url_for('venda')}}"><i class="bi bi-reply" style="font-size:1.5rem; color:white;"></i></a>
+  </div>
+</div>
+<div class="boxformulario">
+  <fieldset>
+    {{form.csrf_token()}}
+    <div class="form-group">{{ form.cod_lote.label(class='form-label') }}
+      {{ form.cod_lote(class='form-control') }}
+    </div>
+    <div class="form-group">{{ form.cod_cliente.label(class='form-label') }}
+      {{ form.cod_cliente(class='form-control') }}
+    </div>
+    <div class="form-group">{{ form.qtdparcelas_venda.label(class='form-label') }}
+      {{ form.qtdparcelas_venda(class='form-control') }}
+    </div>        
+    <div class="form-group">{{ form.valorparcela_venda.label(class='form-label') }}
+      {{ form.valorparcela_venda(class='form-control') }}
+    </div>
+    <div class="form-group">{{ form.diavenc_venda.label(class='form-label') }}
+      {{ form.diavenc_venda(class='form-control') }}
+    </div>
+    <div class="form-group">{{ form.data_venda.label(class='form-label') }}
+      {{ form.data_venda(class='form-control') }}
+    </div>
+    <div class="form-group">{{ form.status_venda.label(class='form-label') }}
+      {{ form.status_venda(class='form-control') }}
+    </div> 
+  </fieldset>  
+</div>
+<div class="box_cabecalho">
+  <div class="box_titulo_interno">
+    <i class="bi bi-archive" data-toggle="tooltip" data-placement="right"></i> Arquivos
+  </div>
+  <div class="box_botoes">
+    <a class="btn btn_titulo" href="{{url_for('novoTerrenoArquivo',id=id)}}">
+      <i class="bi bi-file-earmark-plus" style="font-size:1.5rem; color:white;"></i>
+    </a></div>
+</div>
+{% if venda_arquivos %}
+<div class="boxcentral">
+  <table class="table table-bordered table-responsiv table-hover">
+      <thead>
+          <tr>
+            <th width="90%">Arquivo</th>
+            <th width="10%" colspan="2">Ações</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for arquivo in venda_arquivos %}
+          <tr>
+              <td class="text-left">{{ arquivo.arquivo_venda_arquivo }}</td>
+              <td>
+                <a class="btn" href="{{url_for('excluirArquivoVenda',id=arquivo.cod_venda_arquivo)}}"><i class="bi bi-eraser" style="font-size:1.5rem; color:black;"></i></a>
+              </td>           
+              <td>
+                <a class="btn" target="_blank" href="../static/upload/{{arquivo.arquivo_venda_arquivo }}">
+                  <i class="bi bi-eye" style="font-size:1.5rem; color:black;"></i>
+                </a>
+              </td>                             
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+{% endif %}
+<div class="box_cabecalho">
+  <div class="box_titulo_interno">
+    <i class="bi bi-currency-dollar" data-toggle="tooltip" data-placement="right"></i> Parcelas
+  </div>
+  <div class="box_botoes">
+    <a class="btn btn_titulo" href="{{url_for('atualizarVendaParcela',id=id)}}">
+      <i class="bi bi-file-earmark-plus" style="font-size:1.5rem; color:white;"></i>
+    </a></div>
+</div>
+<div class="boxcentral">
+  <table class="table table-bordered table-responsiv table-hover">
+      <thead>
+          <tr>
+            <th width="40%">Data</th>
+            <th width="40%">Valor</th>
+            <th width="10%">Status</th>
+            <th width="10%">Ações</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for parcela in venda_parcelas %}
+          <tr>
+              <td class="text-left">{{ parcela.datavenc_vendaparcela.strftime('%d/%m/%Y') }}</td>
+              <td class="text-left">{{ parcela.valorparcela_vendaparcela }}</td>
+              <td class="text-left">
+                {% if parcela.status_vendaparcela == 0: %}
+                <i class="btn bi bi-toggle-on text-success" style="font-size:2rem; color:white;">
+                {% else %}
+                <i class="btn bi bi-toggle-off text-danger" style="font-size:2rem; color:white;">
+                {% endif %}                       
+              <td>
+                <a class="btn" href="{{url_for('visualizarVendaParcela',id=parcela.cod_vendaparcela)}}"><i class="bi bi-eye" style="font-size:1.5rem; color:black;"></i></a>
+            </td>              
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+{% endblock%}

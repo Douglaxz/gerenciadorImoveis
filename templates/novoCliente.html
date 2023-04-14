@@ -16,15 +16,12 @@
     <div class="boxformulario">
       <fieldset>
         {{ form.csrf_token() }}
-        <div class="form-group">{{ form.cnpj_cliente.label(class='form-label') }}
-          {{ form.cnpj_cliente(class='form-control') }}
+        <div class="form-group">{{ form.cpf_cliente.label(class='form-label') }}
+          {{ form.cpf_cliente(class='form-control') }}
         </div>          
-        <div class="form-group">{{ form.nomerazao_cliente.label(class='form-label') }}
-          {{ form.nomerazao_cliente(class='form-control') }}
-        </div>
-        <div class="form-group">{{ form.nomefantasia_cliente.label(class='form-label') }}
-          {{ form.nomefantasia_cliente(class='form-control') }}
-        </div>        
+        <div class="form-group">{{ form.nome_cliente.label(class='form-label') }}
+          {{ form.nome_cliente(class='form-control') }}
+        </div>       
         <div class="form-group">{{ form.end_cliente.label(class='form-label') }}
           {{ form.end_cliente(class='form-control') }}
         </div>      
@@ -42,7 +39,13 @@
         </div>      
         <div class="form-group">{{ form.complemento_cliente.label(class='form-label') }}
           {{ form.complemento_cliente(class='form-control') }}
-        </div>        
+        </div>
+        <div class="form-group">{{ form.fone_cliente.label(class='form-label') }}
+          {{ form.fone_cliente(class='form-control') }}
+        </div> 
+        <div class="form-group">{{ form.email_cliente.label(class='form-label') }}
+          {{ form.email_cliente(class='form-control') }}
+        </div>         
         <div class="form-group">{{ form.status.label(class='form-label') }}
           {{ form.status(class='form-control') }}
         </div>
