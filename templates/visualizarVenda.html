@@ -98,7 +98,7 @@
               <td class="text-left">{{ parcela.datavenc_vendaparcela.strftime('%d/%m/%Y') }}</td>
               <td class="text-left">{{ parcela.valorparcela_vendaparcela }}</td>
               <td class="text-left">
-                {% if parcela.status_vendaparcela == 0: %}
+                {% if parcela.status_vendaparcela == 1: %}
                 <i class="btn bi bi-toggle-on text-success" style="font-size:2rem; color:white;">
                 {% else %}
                 <i class="btn bi bi-toggle-off text-danger" style="font-size:2rem; color:white;">

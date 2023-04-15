@@ -36,7 +36,10 @@ from helpers import \
     frm_editar_terreno_arquivo,\
     frm_editar_venda,\
     frm_visualizar_venda,\
-    frm_editar_venda_arquivo
+    frm_editar_venda_arquivo,\
+    frm_editar_venda_parcela,\
+    frm_visualizar_venda_parcela
+    
 
 # ITENS POR PÁGINA
 from config import ROWS_PER_PAGE, CHAVE
@@ -1255,4 +1258,60 @@ def atualizarVendaParcela(id):
 
 @app.route('/visualizarVendaParcela/<int:id>')
 def visualizarVendaParcela(id):
-    pass
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('visualizarVenda')))  
+    venda_parcela = tb_venda_parcela.query.filter_by(cod_vendaparcela=id).first()
+    idvenda = venda_parcela.cod_venda
+    form = frm_visualizar_venda_parcela()
+    form.valorparcela_vendaparcela.data = venda_parcela.valorparcela_vendaparcela
+    form.datavenc_vendaparcela.data = venda_parcela.datavenc_vendaparcela
+    form.datapag_vendaparcela.data = venda_parcela.datapag_vendaparcela
+    form.status_vendaparcela.data = venda_parcela.status_vendaparcela
+    return render_template('visualizarVendaParcela.html', titulo='Visualizar Parcela', id=id, form=form,idvenda=idvenda)
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: editarVendaParcela
+##FUNÇÃO: formulário de edição
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/editarVendaParcela/<int:id>')
+def editarVendaParcela(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('editarVendaParcela')))  
+    venda_parcela = tb_venda_parcela.query.filter_by(cod_vendaparcela=id).first()
+    form = frm_editar_venda_parcela()
+    form.valorparcela_vendaparcela.data = venda_parcela.valorparcela_vendaparcela
+    form.datavenc_vendaparcela.data = venda_parcela.datavenc_vendaparcela
+    form.datapag_vendaparcela.data = venda_parcela.datapag_vendaparcela
+    form.status_vendaparcela.data = venda_parcela.status_vendaparcela
+    return render_template('editarVendaParcela.html', titulo='Editar Venda Parcela', id=id, form=form)   
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#ROTA: atualizarVendaParcela1
+#FUNÇÃO: alterar informações no banco de dados
+#PODE ACESSAR: administrador
+#---------------------------------------------------------------------------------------------------------------------------------
+@app.route('/atualizarVendaParcela1', methods=['POST',])
+def atualizarVendaParcela1():
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        flash('Sessão expirou, favor logar novamente','danger')
+        return redirect(url_for('login',proxima=url_for('atualizarVendaParcela1')))      
+    form = frm_editar_venda_parcela(request.form)
+    if form.validate_on_submit():
+        id = request.form['id']
+        venda_parcela = tb_venda_parcela.query.filter_by(cod_vendaparcela=id).first()
+        venda_parcela.valorparcela_vendaparcela = form.valorparcela_vendaparcela.data
+        venda_parcela.datavenc_vendaparcela = form.datavenc_vendaparcela.data
+        venda_parcela.datapag_vendaparcela = form.datapag_vendaparcela.data
+        venda_parcela.status_vendaparcela = form.status_vendaparcela.data
+
+        db.session.add(venda_parcela)
+        db.session.commit()
+        flash('Parcela atualizado com sucesso!','success')
+    else:
+        for field, errors in form.errors.items():
+            msg = (f"Campo {field} não validou. Erros: {', '.join(errors)}")
+        return str(msg)
+        flash('Favor verificar os campos!','danger')
+    return redirect(url_for('visualizarVendaParcela', id=request.form['id']))

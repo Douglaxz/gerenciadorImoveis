@@ -245,3 +245,29 @@ class frm_visualizar_venda(FlaskForm):
 #---------------------------------------------------------------------------------------------------------------------------------
 class frm_editar_venda_arquivo(FlaskForm):
     arquivo_venda_arquivo = FileField('Arquivo:', [validators.DataRequired()], render_kw={"placeholder": "selecionar arquivo"})
+
+##################################################################################################################################
+#VENDA PARCELA
+##################################################################################################################################
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#FORMUÁRIO: venda
+#TIPO: edição
+#TABELA: tb_venda_parcela
+#---------------------------------------------------------------------------------------------------------------------------------
+class frm_editar_venda_parcela(FlaskForm):
+    valorparcela_vendaparcela = DecimalField('Qtd Parcelas:', [validators.DataRequired()], render_kw={"placeholder": "digite o valor de parcelas"})
+    datavenc_vendaparcela = DateField('Data Venda:', [validators.DataRequired()], render_kw={"placeholder": "digite a data da vencimento do lote"})
+    datapag_vendaparcela = DateField('Data Pagamento:', [validators.DataRequired()], render_kw={"placeholder": "digite a data da pagamento do lote"})
+    status_vendaparcela = SelectField('Situação:', coerce=int, choices=[(0, 'Em Aberto'),(1, 'Pago')])
+
+#---------------------------------------------------------------------------------------------------------------------------------
+#FORMUÁRIO: venda
+#TIPO: visualização
+#TABELA: tb_venda
+#---------------------------------------------------------------------------------------------------------------------------------
+class frm_visualizar_venda_parcela(FlaskForm):
+    valorparcela_vendaparcela = DecimalField('Qtd Parcelas:', [validators.DataRequired()], render_kw={'readonly': True})
+    datavenc_vendaparcela = DateField('Data Venda:', [validators.DataRequired()], render_kw={'readonly': True})
+    datapag_vendaparcela = DateField('Data Pagamento:', [validators.DataRequired()], render_kw={'readonly': True})
+    status_vendaparcela = SelectField('Situação:', coerce=int, choices=[(0, 'Em Aberto'),(1, 'Pago')], render_kw={'readonly': True})
