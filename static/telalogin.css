@@ -84,6 +84,11 @@ body {
     .container {
       flex-direction: column;
     }
+
+    .figura {
+      font-size: 4.5rem;
+      text-align: center;
+    }
     
     .image {
       flex: 0 0 0%; /* alterado */
